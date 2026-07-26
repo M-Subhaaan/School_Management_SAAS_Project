@@ -13,6 +13,9 @@ app.use(helmet());
 const subscriptionPlanRouter = require("./routes/subscriptionPlanRouter");
 app.use("/api/v1/subscription-plans", subscriptionPlanRouter);
 
+const accountRouter = require("./routes/accountRouter");
+app.use("/api/v1/accounts", accountRouter);
+
 app.use((req, res, next) => {
   return next(
     AppError(`Unable to find ${req.originalUrl} on this Server`, 404),

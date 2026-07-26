@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
-const Account = sequelize.define(
-  "Account",
+const User = sequelize.define(
+  "User",
   {
     id: {
       type: DataTypes.UUID,
@@ -10,15 +10,25 @@ const Account = sequelize.define(
       primaryKey: true,
     },
 
-    name: {
-      type: DataTypes.STRING(150),
+    firstName: {
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
 
-    slug: {
-      type: DataTypes.STRING(180),
+    lastName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+
+    email: {
+      type: DataTypes.STRING(150),
       allowNull: false,
       unique: true,
+    },
+
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
 
     status: {
@@ -28,16 +38,10 @@ const Account = sequelize.define(
     },
   },
   {
-    tableName: "accounts",
+    tableName: "users",
     timestamps: true,
     paranoid: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ["slug"],
-      },
-    ],
   },
 );
 
-module.exports = Account;
+module.exports = User;
