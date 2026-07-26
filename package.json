@@ -1,0 +1,20 @@
+{
+  "name": "school_management_saas_project",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "M Subhan",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./src/server.js",
+    "start": "node ./src/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "mysql2": "^3.23.1",
+    "sequelize": "^6.37.8"
+  }
+}
