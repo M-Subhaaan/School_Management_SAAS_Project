@@ -5,6 +5,7 @@ const { sequelize } = require("../config/db");
 const User = require("../models/userModel");
 const Account = require("../models/accountModel");
 const SubscriptionPlan = require("../models/subscriptionPlanModel");
+const Subscription = require("../models/subscriptionModel");
 
 const { encrypt, decrypt } = require("../utils/encryption");
 const hashValue = require("../utils/hash");
@@ -83,6 +84,21 @@ exports.register = catchAsync(async (req, res, next) => {
       await transaction.rollback();
       return next(AppError("Silver Subscription plan not found", 400));
     }
+
+    const subscription = await Subscription.create(
+      {
+        accountId: account.id,
+        planId: silverPlan.id,
+        billingCycle: "FREE",
+        startDate: new Date(),
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: null,
+      },
+      {
+        transaction,
+      },
+    );
+
     await transaction.commit();
 
     const token = generateToken(user, res);

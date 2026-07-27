@@ -22,6 +22,11 @@ const SubscriptionPlan = sequelize.define(
       defaultValue: 0,
     },
 
+    billingCycle: {
+      type: DataTypes.ENUM("FREE", "MONTHLY"),
+      allowNull: false,
+    },
+
     maxSchools: {
       type: DataTypes.INTEGER,
       allowNull: false,
