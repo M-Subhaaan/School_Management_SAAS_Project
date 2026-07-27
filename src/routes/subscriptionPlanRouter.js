@@ -1,5 +1,5 @@
 const express = require("express");
-const subscriptionController = require("../controllers/subscriptionController");
+const subscriptionController = require("../controllers/subscriptionPlanController");
 
 const router = express.Router();
 
