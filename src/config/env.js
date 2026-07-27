@@ -26,6 +26,10 @@ const env = {
   cookies: {
     cookieExpiresIn: process.env.COOKIE_EXPIRES_IN,
   },
+
+  encryption: {
+    encryptionKey: process.env.ENCRYPTION_KEY,
+  },
 };
 
 module.exports = env;

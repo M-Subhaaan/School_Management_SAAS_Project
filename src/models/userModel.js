@@ -20,8 +20,13 @@ const User = sequelize.define(
       allowNull: false,
     },
 
-    email: {
-      type: DataTypes.STRING(150),
+    emailEncrypted: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+
+    emailHash: {
+      type: DataTypes.STRING(64),
       allowNull: false,
       unique: true,
     },
@@ -31,10 +36,34 @@ const User = sequelize.define(
       allowNull: false,
     },
 
+    changedPasswordAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
     status: {
       type: DataTypes.ENUM("ACTIVE", "SUSPENDED", "DELETED"),
       allowNull: false,
       defaultValue: "ACTIVE",
+    },
+  },
+  {
+    hooks: {
+      beforeUpdate: (user) => {
+        if (user.changed("password")) {
+          user.set("changedPasswordAt", new Date());
+        }
+      },
     },
   },
   {
