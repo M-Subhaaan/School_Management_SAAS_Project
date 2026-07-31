@@ -27,9 +27,14 @@ const Subscription = sequelize.define(
       defaultValue: "ACTIVE",
     },
 
-    billingCycle: {
-      type: DataTypes.ENUM("FREE", "MONTHLY"),
-      allowNull: false,
+    stripeCustomerId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    stripeSubscriptionId: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
 
     startDate: {

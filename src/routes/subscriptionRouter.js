@@ -7,4 +7,6 @@ const router = express.Router();
 
 router.get("/me", protect, subscriptionController.getMySubscription);
 
+router.get("/checkout");
+
 module.exports = router;

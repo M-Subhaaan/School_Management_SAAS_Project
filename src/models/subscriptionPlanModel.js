@@ -42,6 +42,12 @@ const SubscriptionPlan = sequelize.define(
       allowNull: false,
     },
 
+    stripePriceId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

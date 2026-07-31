@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const Account = require("../models/accountModel");
 const Subscription = require("../models/subscriptionModel");
 const SubscriptionPlan = require("../models/subscriptionPlanModel");
+const Payment = require("../models/paymentModel");
 
 // User → Account
 User.hasOne(Account, {
@@ -12,6 +13,17 @@ User.hasOne(Account, {
 Account.belongsTo(User, {
   foreignKey: "ownerId",
   as: "owner",
+});
+
+// Account → Payment
+Account.hasMany(Payment, {
+  foreignKey: "accountId",
+  as: "payments",
+});
+
+Payment.belongsTo(Account, {
+  foreignKey: "accountId",
+  as: "account",
 });
 
 // Account → Subscription

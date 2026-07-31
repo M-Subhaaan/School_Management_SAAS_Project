@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
+const env = require("../config/env");
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
@@ -21,7 +22,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, env.jwt.accessSecret);
   } catch (error) {
     return next(AppError("Invalid Token", 401));
   }

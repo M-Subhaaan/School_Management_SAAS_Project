@@ -17,10 +17,8 @@ const env = {
 
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
 
-    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
   },
 
   cookies: {
@@ -29,6 +27,11 @@ const env = {
 
   encryption: {
     encryptionKey: process.env.ENCRYPTION_KEY,
+  },
+
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY,
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
 };
 

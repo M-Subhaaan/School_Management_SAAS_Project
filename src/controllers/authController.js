@@ -129,6 +129,7 @@ exports.register = catchAsync(async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.log(error);
     await transaction.rollback();
     return next(error);
   }
@@ -253,7 +254,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   await user.save();
 
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/api/v1/auth/reset-password/${resetToken}`;
 
   await emailService.sendPasswordResetEmail(normalizedEmail, resetUrl);
 
