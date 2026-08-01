@@ -7,10 +7,13 @@ const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
-app.use(express.json());
+app.use(helmet());
 app.use(cookieParser());
 
-app.use(helmet());
+const webhookRouter = require("./routes/webhookRouter");
+app.use("/api/v1/webhooks", webhookRouter);
+
+app.use(express.json());
 
 const subscriptionPlanRouter = require("./routes/subscriptionPlanRouter");
 app.use("/api/v1/subscription-plans", subscriptionPlanRouter);
