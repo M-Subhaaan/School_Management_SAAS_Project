@@ -10,19 +10,18 @@ const Payment = require("../models/paymentModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
-const handleCheckoutCompleted = async (session) => {
+const handleCheckoutCompleted = catchAsync(async (session) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { accountId, subscriptionId, planId } = session.metadata;
+    const { subscriptionId, planId } = session.metadata;
 
     const subscription = await Subscription.findByPk(subscriptionId, {
       transaction,
     });
 
     if (!subscription) {
-      await transaction.rollback();
-      return AppError("Subscription not found", 404);
+      throw AppError("Subscription not found", 404);
     }
 
     const plan = await SubscriptionPlan.findByPk(planId, {
@@ -30,8 +29,7 @@ const handleCheckoutCompleted = async (session) => {
     });
 
     if (!plan) {
-      await transaction.rollback();
-      return AppError("Plan not found", 404);
+      throw AppError("Plan not found", 404);
     }
 
     // Retrieve Stripe Subscription
@@ -42,13 +40,14 @@ const handleCheckoutCompleted = async (session) => {
     const subscriptionItem = stripeSubscription.items?.data?.[0];
 
     if (!subscriptionItem) {
-      return AppError("Subscription item not found", 404);
+      throw AppError("Subscription item not found", 404);
     }
 
     // Update Subscription
     await subscription.update(
       {
         planId: plan.id,
+        stripeCustomerId: stripeSubscription.customer,
 
         stripeSubscriptionId: stripeSubscription.id,
 
@@ -65,26 +64,95 @@ const handleCheckoutCompleted = async (session) => {
       },
     );
 
-    // Create Payment History
+    await transaction.commit();
+
+    console.log("Subscription upgraded successfully.");
+  } catch (error) {
+    await transaction.rollback();
+
+    throw error;
+  }
+});
+
+const handleInvoicePaid = catchAsync(async (invoice) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Prevent duplicate processing
+    const existingPayment = await Payment.findOne({
+      where: {
+        stripeInvoiceId: invoice.id,
+      },
+      transaction,
+    });
+
+    if (existingPayment) {
+      console.log("Invoice already processed.");
+
+      await transaction.commit();
+
+      return;
+    }
+
+    // Retrieve Stripe Subscription
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      invoice.subscription,
+    );
+
+    const subscriptionItem = stripeSubscription.items?.data?.[0];
+
+    if (!subscriptionItem) {
+      throw AppError("Subscription Item not found", 404);
+    }
+
+    // Find Local Subscription
+    const subscription = await Subscription.findOne({
+      where: {
+        stripeSubscriptionId: stripeSubscription.id,
+      },
+      transaction,
+    });
+
+    if (!subscription) {
+      throw AppError("Subscription not found", 404);
+    }
+
+    // Update Billing Period
+    await subscription.update(
+      {
+        status: "ACTIVE",
+
+        currentPeriodStart: new Date(
+          subscriptionItem.current_period_start * 1000,
+        ),
+
+        currentPeriodEnd: new Date(subscriptionItem.current_period_end * 1000),
+      },
+      {
+        transaction,
+      },
+    );
+
+    // Create Payment Record
     await Payment.create(
       {
-        accountId,
+        accountId: subscription.accountId,
 
         subscriptionId: subscription.id,
 
-        stripePaymentIntentId: session.payment_intent,
+        stripeInvoiceId: invoice.id,
 
-        stripeInvoiceId: stripeSubscription.latest_invoice,
+        stripePaymentIntentId: invoice.payment_intent,
 
-        amount: session.amount_total / 100,
+        amount: invoice.amount_paid / 100,
 
-        currency: session.currency,
+        currency: invoice.currency,
 
         paymentMethod: "CARD",
 
-        status: "SUCCEEDED",
+        status: invoice.paid ? "SUCCEEDED" : "FAILED",
 
-        paidAt: new Date(),
+        paidAt: new Date(invoice.status_transitions.paid_at * 1000),
       },
       {
         transaction,
@@ -93,12 +161,13 @@ const handleCheckoutCompleted = async (session) => {
 
     await transaction.commit();
 
-    console.log("Subscription upgraded successfully.");
+    console.log("Invoice Paid Successfully.");
   } catch (error) {
     await transaction.rollback();
-    console.error(error);
+
+    throw error;
   }
-};
+});
 
 exports.stripeWebhook = catchAsync(async (req, res, next) => {
   const signature = req.headers["stripe-signature"];
@@ -118,6 +187,10 @@ exports.stripeWebhook = catchAsync(async (req, res, next) => {
   switch (event.type) {
     case "checkout.session.completed":
       await handleCheckoutCompleted(event.data.object);
+      break;
+
+    case "invoice.paid":
+      await handleInvoicePaid(event.data.object);
       break;
 
     default:
