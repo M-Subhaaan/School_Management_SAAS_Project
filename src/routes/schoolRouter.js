@@ -19,4 +19,8 @@ router.post(
 router.get("/", protect, schoolController.getMySchools);
 router.get("/:id", protect, schoolController.getSchoolById);
 
+router.patch("/:id", protect, schoolController.updateSchool);
+
+router.patch("/:id/deactivate", protect, schoolController.deactivateSchool);
+router.patch("/:id/activate", protect, schoolController.activateSchool);
 module.exports = router;

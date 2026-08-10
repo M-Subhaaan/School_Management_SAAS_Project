@@ -167,6 +167,7 @@ exports.getMySchools = catchAsync(async (req, res, next) => {
   const schools = await School.findAll({
     where: {
       accountId: account.id,
+      status: "ACTIVE",
     },
 
     order: [["createdAt", "DESC"]],
@@ -220,6 +221,189 @@ exports.getSchoolById = catchAsync(async (req, res, next) => {
     status: "Success",
     data: {
       school,
+    },
+  });
+});
+
+exports.updateSchool = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const schoolId = req.params.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const school = await School.findOne({
+    where: {
+      id: schoolId,
+      accountId: account.id,
+    },
+  });
+
+  if (!school) {
+    throw AppError("School not found", 404);
+  }
+
+  const { name, address, phone, email } = req.body;
+
+  const updates = {};
+
+  if (name !== undefined) {
+    updates.name = name;
+
+    // Generate new slug when name changes
+    updates.slug = `${name}-${Date.now()}`
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  if (address !== undefined) {
+    updates.address = address;
+  }
+
+  if (phone !== undefined) {
+    updates.phone = phone;
+  }
+
+  if (email !== undefined) {
+    updates.email = email;
+  }
+
+  await school.update(updates);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      school,
+    },
+  });
+});
+
+exports.deactivateSchool = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const schoolId = req.params.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const school = await School.findOne({
+    where: {
+      id: schoolId,
+      accountId: account.id,
+    },
+  });
+
+  if (!school) {
+    throw AppError("School not found", 404);
+  }
+
+  if (school.status === "INACTIVE") {
+    throw AppError("School is already inactive", 400);
+  }
+
+  await school.update({
+    status: "INACTIVE",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "School deactivated successfully",
+    data: {
+      school: {
+        id: school.id,
+        name: school.name,
+        slug: school.slug,
+        status: school.status,
+      },
+    },
+  });
+});
+
+exports.activateSchool = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const schoolId = req.params.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const school = await School.findOne({
+    where: {
+      id: schoolId,
+      accountId: account.id,
+    },
+  });
+
+  if (!school) {
+    throw AppError("School not found", 404);
+  }
+
+  if (school.status === "ACTIVE") {
+    throw AppError("School is already active", 400);
+  }
+
+  await school.update({
+    status: "ACTIVE",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "School activated successfully",
+    data: {
+      school: {
+        id: school.id,
+        name: school.name,
+        slug: school.slug,
+        status: school.status,
+      },
     },
   });
 });
