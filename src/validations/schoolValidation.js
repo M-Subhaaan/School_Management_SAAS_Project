@@ -41,3 +41,29 @@ exports.createSchoolValidation = [
     .isLength({ min: 3, max: 3 })
     .withMessage("Currency must be a 3-letter code"),
 ];
+
+exports.updateSchoolValidation = [
+  body("name")
+    .optional()
+    .notEmpty()
+    .withMessage("School name cannot be empty")
+    .trim(),
+
+  body("address")
+    .optional()
+    .notEmpty()
+    .withMessage("School address cannot be empty")
+    .trim(),
+
+  body("phone")
+    .optional()
+    .notEmpty()
+    .withMessage("School phone cannot be empty")
+    .trim(),
+
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Valid school email is required")
+    .normalizeEmail(),
+];

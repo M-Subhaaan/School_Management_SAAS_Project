@@ -4,6 +4,7 @@ const Subscription = require("../models/subscriptionModel");
 const SubscriptionPlan = require("../models/subscriptionPlanModel");
 const Payment = require("../models/paymentModel");
 const School = require("../models/schoolModel");
+const Teacher = require("../models/teacherModel");
 
 // User → Account
 User.hasOne(Account, {
@@ -60,10 +61,34 @@ School.belongsTo(Account, {
   foreignKey: "accountId",
   as: "account",
 });
+// Account → Teacher
+Account.hasMany(Teacher, {
+  foreignKey: "accountId",
+  as: "teachers",
+});
+
+Teacher.belongsTo(Account, {
+  foreignKey: "accountId",
+  as: "account",
+});
+
+// School → Teacher
+School.hasMany(Teacher, {
+  foreignKey: "schoolId",
+  as: "teachers",
+});
+
+Teacher.belongsTo(School, {
+  foreignKey: "schoolId",
+  as: "school",
+});
 
 module.exports = {
   User,
   Account,
   Subscription,
   SubscriptionPlan,
+  Payment,
+  School,
+  Teacher,
 };
