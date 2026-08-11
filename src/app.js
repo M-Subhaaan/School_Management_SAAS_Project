@@ -30,6 +30,9 @@ app.use("/api/v1/subscriptions", subscriptionRouter);
 const schoolRouter = require("./routes/schoolRouter");
 app.use("/api/v1/schools", schoolRouter);
 
+const teacherRouter = require("./routes/teacherRouter");
+app.use("/api/v1/teachers", teacherRouter);
+
 app.use((req, res, next) => {
   return next(
     AppError(`Unable to find ${req.originalUrl} on this Server`, 404),
