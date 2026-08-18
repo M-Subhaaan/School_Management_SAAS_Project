@@ -405,57 +405,107 @@ exports.deactivateTeacher = catchAsync(async (req, res, next) => {
 });
 
 exports.activateTeacher = catchAsync(async (req, res, next) => {
+  const transaction = await sequelize.transaction();
   const teacherId = req.params.id;
   const userId = req.user.id;
+  try {
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Account,
+          as: "account",
+        },
+      ],
+      transaction,
+    });
 
-  const user = await User.findByPk(userId, {
-    include: [
+    if (!user) {
+      throw AppError("User not found", 404);
+    }
+
+    const account = user.account;
+
+    if (!account) {
+      throw AppError("Account not found", 404);
+    }
+
+    const teacher = await Teacher.findOne({
+      where: {
+        id: teacherId,
+        accountId: account.id,
+      },
+      transaction,
+    });
+
+    if (!teacher) {
+      throw AppError("Teacher not found", 404);
+    }
+
+    if (teacher.status === "ACTIVE") {
+      throw AppError("Teacher is already active", 400);
+    }
+
+    // Re-validate plan limit before re-activating
+    const subscription = await Subscription.findOne({
+      where: {
+        accountId: account.id,
+        status: "ACTIVE",
+      },
+      include: [
+        {
+          model: SubscriptionPlan,
+          as: "plan",
+        },
+      ],
+      transaction,
+    });
+
+    if (!subscription) {
+      throw AppError("Active subscription not found", 404);
+    }
+
+    const plan = subscription.plan;
+
+    if (!plan) {
+      throw AppError("Subscription Plan not found", 404);
+    }
+
+    const activeTeacherCount = await Teacher.count({
+      where: {
+        accountId: account.id,
+        status: "ACTIVE",
+      },
+      transaction,
+    });
+
+    if (activeTeacherCount >= plan.maxTeachers) {
+      throw AppError(
+        `Your ${plan.name} plan allows a maximum of ${plan.maxTeachers} active teachers`,
+        400,
+      );
+    }
+
+    await teacher.update(
       {
-        model: Account,
-        as: "account",
+        status: "ACTIVE",
       },
-    ],
-  });
+      { transaction },
+    );
 
-  if (!user) {
-    throw AppError("User not found", 404);
-  }
-
-  const account = user.account;
-
-  if (!account) {
-    throw AppError("Account not found", 404);
-  }
-
-  const teacher = await Teacher.findOne({
-    where: {
-      id: teacherId,
-      accountId: account.id,
-    },
-  });
-
-  if (!teacher) {
-    throw AppError("Teacher not found", 404);
-  }
-
-  if (teacher.status === "ACTIVE") {
-    throw AppError("Teacher is already active", 400);
-  }
-
-  await teacher.update({
-    status: "ACTIVE",
-  });
-
-  res.status(200).json({
-    status: "success",
-    message: "Teacher activated successfully",
-    data: {
-      teacher: {
-        id: teacher.id,
-        firstName: teacher.firstName,
-        lastName: teacher.lastName,
-        status: teacher.status,
+    res.status(200).json({
+      status: "success",
+      message: "Teacher activated successfully",
+      data: {
+        teacher: {
+          id: teacher.id,
+          firstName: teacher.firstName,
+          lastName: teacher.lastName,
+          status: teacher.status,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return next(error);
+  }
 });

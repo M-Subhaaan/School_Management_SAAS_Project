@@ -37,6 +37,7 @@ exports.createSchool = catchAsync(async (req, res, next) => {
           as: "account",
         },
       ],
+      transaction,
     });
 
     if (!user) {
