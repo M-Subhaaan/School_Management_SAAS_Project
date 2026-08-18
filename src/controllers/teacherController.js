@@ -18,9 +18,12 @@ exports.createTeacher = catchAsync(async (req, res, next) => {
       firstName,
       lastName,
       email,
+      dateOfBirth,
       phone,
       employeeId,
       qualification,
+      designation,
+      gender,
       joiningDate,
     } = req.body;
 
@@ -118,11 +121,13 @@ exports.createTeacher = catchAsync(async (req, res, next) => {
         firstName,
         lastName,
         email,
+        dateOfBirth,
         phone,
         employeeId,
         qualification,
+        designation,
+        gender,
         joiningDate,
-        status: "ACTIVE",
       },
       {
         transaction,
@@ -277,6 +282,180 @@ exports.getTeacherById = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       teacher,
+    },
+  });
+});
+
+exports.updateTeacher = catchAsync(async (req, res, next) => {
+  const teacherId = req.params.id;
+  const userId = req.user.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const teacher = await Teacher.findOne({
+    where: {
+      id: teacherId,
+      accountId: account.id,
+    },
+  });
+
+  if (!teacher) {
+    throw AppError("Teacher not found or does not belong to your account", 404);
+  }
+
+  const {
+    firstName,
+    lastName,
+    phone,
+    gender,
+    dateOfBirth,
+    qualification,
+    designation,
+  } = req.body;
+
+  await teacher.update({
+    firstName,
+    lastName,
+    phone,
+    gender,
+    dateOfBirth,
+    qualification,
+    designation,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      teacher,
+    },
+  });
+});
+
+exports.deactivateTeacher = catchAsync(async (req, res, next) => {
+  const teacherId = req.params.id;
+  const userId = req.user.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const teacher = await Teacher.findOne({
+    where: {
+      id: teacherId,
+      accountId: account.id,
+    },
+  });
+
+  if (!teacher) {
+    throw AppError("Teacher not found", 404);
+  }
+
+  if (teacher.status === "INACTIVE") {
+    throw AppError("Teacher is already inactive", 400);
+  }
+
+  await teacher.update({
+    status: "INACTIVE",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Teacher deactivated successfully",
+    data: {
+      teacher: {
+        id: teacher.id,
+        firstName: teacher.firstName,
+        lastName: teacher.lastName,
+        status: teacher.status,
+      },
+    },
+  });
+});
+
+exports.activateTeacher = catchAsync(async (req, res, next) => {
+  const teacherId = req.params.id;
+  const userId = req.user.id;
+
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Account,
+        as: "account",
+      },
+    ],
+  });
+
+  if (!user) {
+    throw AppError("User not found", 404);
+  }
+
+  const account = user.account;
+
+  if (!account) {
+    throw AppError("Account not found", 404);
+  }
+
+  const teacher = await Teacher.findOne({
+    where: {
+      id: teacherId,
+      accountId: account.id,
+    },
+  });
+
+  if (!teacher) {
+    throw AppError("Teacher not found", 404);
+  }
+
+  if (teacher.status === "ACTIVE") {
+    throw AppError("Teacher is already active", 400);
+  }
+
+  await teacher.update({
+    status: "ACTIVE",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Teacher activated successfully",
+    data: {
+      teacher: {
+        id: teacher.id,
+        firstName: teacher.firstName,
+        lastName: teacher.lastName,
+        status: teacher.status,
+      },
     },
   });
 });

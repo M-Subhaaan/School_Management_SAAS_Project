@@ -40,6 +40,11 @@ const Teacher = sequelize.define(
       allowNull: true,
     },
 
+    dateOfBirth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
     employeeId: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -50,9 +55,19 @@ const Teacher = sequelize.define(
       allowNull: true,
     },
 
+    designation: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     joiningDate: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+
+    gender: {
+      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+      allowNull: false,
     },
 
     status: {
