@@ -174,7 +174,7 @@ exports.getMySchools = catchAsync(async (req, res, next) => {
   });
 
   res.status(200).json({
-    status: "Success",
+    status: "success",
     results: schools.length,
 
     data: {
@@ -218,7 +218,7 @@ exports.getSchoolById = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json({
-    status: "Success",
+    status: "success",
     data: {
       school,
     },

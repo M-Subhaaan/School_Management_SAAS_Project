@@ -89,7 +89,6 @@ exports.register = catchAsync(async (req, res, next) => {
       {
         accountId: account.id,
         planId: silverPlan.id,
-        billingCycle: "FREE",
         startDate: new Date(),
         currentPeriodStart: new Date(),
         currentPeriodEnd: null,
@@ -129,7 +128,6 @@ exports.register = catchAsync(async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
     await transaction.rollback();
     return next(error);
   }
@@ -259,7 +257,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await emailService.sendPasswordResetEmail(normalizedEmail, resetUrl);
 
   res.status(200).json({
-    status: "Success",
+    status: "success",
     message: "A Reset Link Has Been Sent to Your Email Address",
   });
 });
@@ -295,7 +293,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   res.status(200).json({
-    status: "Success",
+    status: "success",
     message: "Password reset successfully",
   });
 });

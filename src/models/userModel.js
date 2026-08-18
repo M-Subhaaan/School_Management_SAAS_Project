@@ -58,6 +58,9 @@ const User = sequelize.define(
     },
   },
   {
+    tableName: "users",
+    timestamps: true,
+    paranoid: true,
     hooks: {
       beforeUpdate: (user) => {
         if (user.changed("password")) {
@@ -65,11 +68,6 @@ const User = sequelize.define(
         }
       },
     },
-  },
-  {
-    tableName: "users",
-    timestamps: true,
-    paranoid: true,
   },
 );
 

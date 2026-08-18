@@ -1,8 +1,10 @@
+// src/models/studentModel.js
+
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
-const Teacher = sequelize.define(
-  "Teacher",
+const Student = sequelize.define(
+  "Student",
   {
     id: {
       type: DataTypes.UUID,
@@ -21,23 +23,28 @@ const Teacher = sequelize.define(
     },
 
     firstName: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
 
     lastName: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
 
     email: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
 
     phone: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
       allowNull: true,
+    },
+
+    gender: {
+      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+      allowNull: false,
     },
 
     dateOfBirth: {
@@ -45,29 +52,19 @@ const Teacher = sequelize.define(
       allowNull: true,
     },
 
-    employeeId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    qualification: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    designation: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    joiningDate: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-
-    gender: {
-      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+    admissionNumber: {
+      type: DataTypes.STRING(50),
       allowNull: false,
+    },
+
+    admissionDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
 
     status: {
@@ -77,19 +74,18 @@ const Teacher = sequelize.define(
     },
   },
   {
-    tableName: "teachers",
+    tableName: "students",
     timestamps: true,
+
     indexes: [
-      { fields: ["accountId"] },
       { fields: ["schoolId"] },
       { fields: ["status"] },
       {
         unique: true,
-        fields: ["accountId", "schoolId", "employeeId"],
-        where: { employeeId: { [require("sequelize").Op.ne]: null } },
+        fields: ["accountId", "schoolId", "admissionNumber"],
       },
     ],
   },
 );
 
-module.exports = Teacher;
+module.exports = Student;

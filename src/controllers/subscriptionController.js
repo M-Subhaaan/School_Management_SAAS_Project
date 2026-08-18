@@ -137,7 +137,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
   });
 
   res.status(200).json({
-    status: "Success",
+    status: "success",
     data: {
       sessionId: session.id,
       checkoutUrl: session.url,
