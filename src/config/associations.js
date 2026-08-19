@@ -6,6 +6,8 @@ const Payment = require("../models/paymentModel");
 const School = require("../models/schoolModel");
 const Teacher = require("../models/teacherModel");
 const Student = require("../models/studentModel");
+const AcademicYear = require("../models/academicYearModel");
+const AcademicTerm = require("../models/academicTermModel");
 
 // User → Account
 User.hasOne(Account, {
@@ -106,6 +108,61 @@ Student.belongsTo(School, {
   as: "school",
 });
 
+// Account → AcademicYear
+Account.hasMany(AcademicYear, {
+  foreignKey: "accountId",
+  as: "academicYears",
+});
+
+AcademicYear.belongsTo(Account, {
+  foreignKey: "accountId",
+  as: "account",
+});
+
+// School → AcademicYear
+School.hasMany(AcademicYear, {
+  foreignKey: "schoolId",
+  as: "academicYears",
+});
+
+AcademicYear.belongsTo(School, {
+  foreignKey: "schoolId",
+  as: "school",
+});
+
+// AcademicYear → AcademicTerm
+AcademicYear.hasMany(AcademicTerm, {
+  foreignKey: "academicYearId",
+  as: "terms",
+});
+
+AcademicTerm.belongsTo(AcademicYear, {
+  foreignKey: "academicYearId",
+  as: "academicYear",
+});
+
+// Account → AcademicTerm
+Account.hasMany(AcademicTerm, {
+  foreignKey: "accountId",
+  as: "academicTerms",
+});
+
+AcademicTerm.belongsTo(Account, {
+  foreignKey: "accountId",
+  as: "account",
+});
+
+// School → AcademicTerm
+School.hasMany(AcademicTerm, {
+  foreignKey: "schoolId",
+  as: "academicTerms",
+});
+
+AcademicTerm.belongsTo(School, {
+  foreignKey: "schoolId",
+  as: "school",
+});
+
 module.exports = {
   User,
   Account,
@@ -115,4 +172,6 @@ module.exports = {
   School,
   Teacher,
   Student,
+  AcademicYear,
+  AcademicTerm,
 };

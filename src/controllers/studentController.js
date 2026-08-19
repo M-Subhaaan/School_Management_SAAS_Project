@@ -6,6 +6,7 @@ const Account = require("../models/accountModel");
 const School = require("../models/schoolModel");
 const Student = require("../models/studentModel");
 const Subscription = require("../models/subscriptionModel");
+const SubscriptionPlan = require("../models/subscriptionPlanModel");
 
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
@@ -166,7 +167,6 @@ exports.getAllStudents = catchAsync(async (req, res, next) => {
         as: "account",
       },
     ],
-    transaction,
   });
 
   if (!user) {
@@ -347,7 +347,6 @@ exports.updateStudent = catchAsync(async (req, res, next) => {
         as: "account",
       },
     ],
-    transaction,
   });
 
   if (!user) {

@@ -55,6 +55,12 @@ app.use("/api/v1/teachers", teacherRouter);
 const studentRouter = require("./routes/studentRouter");
 app.use("/api/v1/students", studentRouter);
 
+const academicYearRouter = require("./routes/academicYearRouter");
+app.use("/api/v1/academic-years", academicYearRouter);
+
+const academicTermRouter = require("./routes/academicTermRouter");
+app.use("/api/v1/academic-terms", academicTermRouter);
+
 app.use((req, res, next) => {
   return next(
     AppError(`Unable to find ${req.originalUrl} on this Server`, 404),
